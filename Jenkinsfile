@@ -2,16 +2,16 @@ pipeline {
 
     agent any
 
+    tools {
+        maven 'Maven'
+    }
+
     stages {
 
-        stage('Check Environment') {
+        stage('Verify') {
             steps {
-                bat 'java -version'
-                bat 'where java'
                 bat 'mvn -version'
-                bat 'where mvn'
             }
         }
-
     }
 }
