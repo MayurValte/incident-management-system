@@ -15,7 +15,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "/user")
-@PreAuthorize("hasRole('ADMIN')")
 public class UserController {
 
     private final UserService userService;
@@ -30,24 +29,28 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<UserDetailsDTO>> getAllUsers() {
         List<UserDetailsDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{userId}")
     public ResponseEntity<UserDetailsDTO> getUserById(@PathVariable Long userId) {
         UserDetailsDTO user = userService.getUserById(userId);
         return ResponseEntity.ok(user);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("{userId}/profile")
     public ResponseEntity<UserProfilesDTO> updateUserProfile(@PathVariable Long userId, @RequestBody UserProfilesDTO userProfilesDTO, Authentication authentication) {
         UserProfilesDTO profilesDTO = userService.updateUserProfile(userId, userProfilesDTO,authentication);
         return ResponseEntity.ok(profilesDTO);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/userProfile/{userId}")
     public ResponseEntity<UserProfilesDTO> getUserProfileByUserId(@PathVariable Long userId) {
 
