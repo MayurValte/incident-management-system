@@ -9,19 +9,39 @@ pipeline {
 
     stages {
 
-        stage('Debug') {
+        stage('Checkout') {
             steps {
-
-                bat 'echo JAVA_HOME=%JAVA_HOME%'
-
-                bat 'dir "%JAVA_HOME%"'
-
-                bat 'java -version'
-
-                bat 'where java'
-
-                bat 'mvn -version'
+                checkout scm
             }
+        }
+
+        stage('Build') {
+            steps {
+                bat 'mvn clean compile'
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                bat 'mvn test'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                bat 'mvn package -DskipTests'
+            }
+        }
+    }
+
+    post {
+
+        success {
+            echo 'Build Successful'
+        }
+
+        failure {
+            echo 'Build Failed'
         }
     }
 }
