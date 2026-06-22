@@ -21,9 +21,9 @@ pipeline {
             }
         }
 
-        stage('Unit Tests') {
+        stage('Unit Tests & Coverage') {
             steps {
-                bat 'mvn test'
+                bat 'mvn verify'
             }
         }
 
@@ -35,6 +35,14 @@ pipeline {
     }
 
     post {
+
+        always {
+            jacoco(
+                execPattern: 'target/jacoco.exec',
+                classPattern: 'target/classes',
+                sourcePattern: 'src/main/java'
+            )
+        }
 
         success {
             echo 'Build Successful'
