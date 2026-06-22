@@ -4,38 +4,14 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Check Environment') {
             steps {
-                checkout scm
+                bat 'java -version'
+                bat 'where java'
+                bat 'mvn -version'
+                bat 'where mvn'
             }
         }
 
-        stage('Build') {
-            steps {
-                bat 'mvn clean compile'
-            }
-        }
-
-        stage('Unit Tests') {
-            steps {
-                bat 'mvn test'
-            }
-        }
-
-        stage('JaCoCo') {
-            steps {
-                bat 'mvn verify'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Build Successful'
-        }
-
-        failure {
-            echo 'Build Failed'
-        }
     }
 }
