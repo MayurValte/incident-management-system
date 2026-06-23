@@ -10,6 +10,7 @@ import com.eimp.repository.UserProfileRepository;
 import com.eimp.repository.UserRepository;
 import com.eimp.service.UserService;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,15 +41,22 @@ public class UserImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "allUsers")
     public List<UserDetailsDTO> getAllUsers() {
         List<UsersEntity> entities = userRepository.findAllUsersWithProfiles();
 
         return entities.stream().map(userEntity -> {
+
             UsersDTO usersDTO = modelMapper.map(userEntity, UsersDTO.class);
 
             UserProfilesDTO profilesDTO = null;
+
             if (userEntity.getUserProfile() != null) {
-                profilesDTO = modelMapper.map(userEntity.getUserProfile(), UserProfilesDTO.class);
+                profilesDTO = modelMapper.map(
+                        userEntity.getUserProfile(),
+                        UserProfilesDTO.class
+                );
+
                 profilesDTO.setUserId(userEntity.getId());
             }
 
@@ -57,10 +65,12 @@ public class UserImpl implements UserService {
             detailsDTO.setUserProfilesDTO(profilesDTO);
 
             return detailsDTO;
-        }).toList();
+
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     @Override
+    @Cacheable(value = "user", key = "#id")
     public UserDetailsDTO getUserById(Long id) {
         UsersEntity userEntity = userRepository.findUserWithProfile(id);
         if (userEntity == null) {
@@ -100,6 +110,7 @@ public class UserImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "userProfile", key = "#userId")
     public UserProfilesDTO getUserProfileByUserId(Long userId) {
 
         UserProfilesEntity userProfilesEntity = userProfileRepository.findByUserId(userId).orElseThrow(() -> new ResourceNotFoundException("UserProfile not found with User id :" + userId));
