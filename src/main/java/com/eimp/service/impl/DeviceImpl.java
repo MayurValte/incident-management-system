@@ -87,7 +87,9 @@ public class DeviceImpl implements DeviceService {
             metricsDTO.setDeviceId(id);
             MetricsEntity toBeSaved = modelMapper.map(metricsDTO, MetricsEntity.class);
             MetricsEntity metricsEntity = metricsRepository.save(toBeSaved);
-            generateAlert(metricsDTO);
+            if(toBeSaved.getThresholdValue().compareTo(toBeSaved.getMetricValue()) > 0){
+                generateAlert(metricsDTO);
+            }
             return modelMapper.map(metricsEntity,MetricsDTO.class);
         }else{
             throw new ResourceNotFoundException("Device not found with id: " + id);

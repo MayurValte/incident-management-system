@@ -20,7 +20,5 @@ public class TagsEntity {
 
     private String name;
 
-    @ManyToMany(mappedBy = "tags")
-    private Set<AlertsEntity> alerts = new HashSet<>();
 }
 

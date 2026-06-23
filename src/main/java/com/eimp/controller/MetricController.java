@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "/metrics")
-@PreAuthorize("hasAnyRole('USER')")
+@PreAuthorize("hasAnyRole('ADMIN','USER')")
 public class MetricController {
 
     private final MetricsService metricsService;

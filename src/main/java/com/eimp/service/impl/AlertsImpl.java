@@ -7,6 +7,7 @@ import com.eimp.entity.TagsEntity;
 import com.eimp.entity.UsersEntity;
 import com.eimp.enums.AlertStatus;
 import com.eimp.enums.Severity;
+import com.eimp.exception.AlertStatusException;
 import com.eimp.exception.ResourceNotFoundException;
 import com.eimp.repository.AlertsRepository;
 import com.eimp.repository.DeviceRepository;
@@ -26,14 +27,12 @@ import java.util.stream.Collectors;
 public class AlertsImpl implements AlertsService {
 
     private final AlertsRepository alertsRepository;
-    private final ModelMapper modelMapper;
     private final UserRepository userRepository;
     private final DeviceRepository deviceRepository;
     private final TagRepository tagsRepository;
 
     public AlertsImpl(AlertsRepository alertsRepository, ModelMapper modelMapper, UserRepository userRepository, DeviceRepository deviceRepository,TagRepository tagRepository) {
         this.alertsRepository = alertsRepository;
-        this.modelMapper = modelMapper;
         this.userRepository = userRepository;
         this.deviceRepository = deviceRepository;
         this.tagsRepository = tagRepository;
@@ -53,7 +52,7 @@ public class AlertsImpl implements AlertsService {
     @Override
     public AlertsDTO assignAlert(Long alertId, Long userId) {
         AlertsEntity alertsEntity = alertsRepository.findById(alertId).orElseThrow(() -> new ResourceNotFoundException("Alert not found with id: " + alertId));
-        UsersEntity user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with id " + userId + "Not present"));
+        UsersEntity user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User with id " + userId + " Not present"));
 
         alertsEntity.setAssignedTo(user);
         AlertsEntity savedAlertEntity = alertsRepository.save(alertsEntity);
@@ -65,6 +64,10 @@ public class AlertsImpl implements AlertsService {
     public AlertsDTO resolveAlert(Long alertId) {
         AlertsEntity alert = alertsRepository.findById(alertId)
                 .orElseThrow(() -> new ResourceNotFoundException("Alert not found with id: " + alertId));
+
+        if(alert.getStatus().equals(AlertStatus.RESOLVED)){
+            throw new AlertStatusException("Alert with id "+alertId+" Already RESOLVED");
+        }
 
         alert.setStatus(AlertStatus.RESOLVED);
         AlertsEntity saved = alertsRepository.save(alert);
@@ -117,6 +120,10 @@ public class AlertsImpl implements AlertsService {
     public AlertsDTO closeAlert(Long alertId) {
         AlertsEntity alert = alertsRepository.findById(alertId)
                 .orElseThrow(() -> new ResourceNotFoundException("Alert not found with id: " + alertId));
+
+        if(alert.getStatus() == AlertStatus.CLOSED){
+            throw new AlertStatusException("Alert Already CLOSED with id "+alertId);
+        }
 
         alert.setStatus(AlertStatus.CLOSED);
         AlertsEntity saved = alertsRepository.save(alert);

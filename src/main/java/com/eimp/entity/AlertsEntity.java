@@ -38,6 +38,8 @@ public class AlertsEntity {
     private DevicesEntity device;
 
     @ManyToMany
-    @JoinTable(name = "alert_tags")
+    @JoinTable(name = "alert_tags",
+            joinColumns = @JoinColumn(name = "alert_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<TagsEntity> tags = new HashSet<>();
 }

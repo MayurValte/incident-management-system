@@ -10,5 +10,4 @@ import java.util.Set;
 public class TagsDTO {
     private Long id;
     private String name;
-    private Set<AlertsEntity> alerts;
 }

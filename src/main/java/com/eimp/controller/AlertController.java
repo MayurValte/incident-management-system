@@ -30,7 +30,7 @@ public class AlertController {
         return ResponseEntity.ok(updated);
     }
 
-    @PatchMapping("/{id}/resolve")
+    @PatchMapping("/{alertId}/resolve")
     public ResponseEntity<AlertsDTO> resolveAlert(@PathVariable Long alertId) {
         AlertsDTO updated = alertsService.resolveAlert(alertId);
         return ResponseEntity.ok(updated);

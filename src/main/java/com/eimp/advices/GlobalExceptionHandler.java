@@ -1,5 +1,6 @@
 package com.eimp.advices;
 
+import com.eimp.exception.AlertStatusException;
 import com.eimp.exception.BadRequestException;
 import com.eimp.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -50,6 +51,17 @@ public class GlobalExceptionHandler {
                 .build();
         return buildErrorResponseEntity(apiError);
     }
+
+    @ExceptionHandler(AlertStatusException.class)
+    public ResponseEntity<ApiResponse<?>> handleAlertAlreadyResolved(AlertStatusException exception){
+        String message = exception.getMessage();
+        ApiError apiError=ApiError.builder()
+                .status(HttpStatus.CONFLICT)
+                .message(message)
+                .build();
+        return buildErrorResponseEntity(apiError);
+    }
+
 
 
 //    @ExceptionHandler(Exception.class)
