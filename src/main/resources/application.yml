@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: Incident-Management-Platform
+
+  datasource:
+    url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  cache:
+    type: redis
+
+  data:
+    redis:
+      host: birthday-bike-birthday-13243.db.redis.io
+      port: 16251
+      password: ${REDIS_PASSWORD}
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: mayurvalte2017@gmail.com
+    password: ${EMAIL_APP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+  swagger-ui:
+    path: /swagger-ui.html
+
+# logging:
+#   level:
+#     com:
+#       eimp: INFO
+#
+#   file:
+#     name: logs/eimp.log
+#
+#   logback:
+#     rollingpolicy:
+#       max-file-size: 10KB
+#       max-history: 1
+#       total-size-cap: 500MB
+#       file-name-pattern: logs/eimp-%d{yyyy-MM-dd}.%i.log
