@@ -14,6 +14,7 @@ import com.eimp.repository.DeviceRepository;
 import com.eimp.repository.TagRepository;
 import com.eimp.repository.UserRepository;
 import com.eimp.service.AlertsService;
+import com.eimp.service.EmailService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,13 +38,15 @@ public class AlertsImpl implements AlertsService {
     private final UserRepository userRepository;
     private final DeviceRepository deviceRepository;
     private final TagRepository tagsRepository;
+    private final EmailService emailService;
 
 
-    public AlertsImpl(AlertsRepository alertsRepository, ModelMapper modelMapper, UserRepository userRepository, DeviceRepository deviceRepository, TagRepository tagRepository) {
+    public AlertsImpl(AlertsRepository alertsRepository, ModelMapper modelMapper, UserRepository userRepository, DeviceRepository deviceRepository, TagRepository tagRepository, EmailService emailService) {
         this.alertsRepository = alertsRepository;
         this.userRepository = userRepository;
         this.deviceRepository = deviceRepository;
         this.tagsRepository = tagRepository;
+        this.emailService = emailService;
     }
 
     @Override
@@ -116,6 +121,24 @@ public class AlertsImpl implements AlertsService {
         }
 
         AlertsEntity savedEntity = alertsRepository.save(alertsEntity);
+
+        Map<String, Object> variables = new HashMap<>();
+
+        variables.put("alertId", savedEntity.getId());
+        variables.put("title", savedEntity.getTitle());
+        variables.put("description", savedEntity.getDescription());
+        variables.put("severity", savedEntity.getSeverity());
+        variables.put("status", savedEntity.getStatus());
+        variables.put("deviceName", device.getHostname());
+
+        emailService.sendEmail(
+                user.getEmail(),
+                "EIMP Alert Notification",
+                "alert-email",
+                variables
+        );
+
+
         log.info("Alert is created with id {}",savedEntity.getId());
         return convertToDto(savedEntity);
     }

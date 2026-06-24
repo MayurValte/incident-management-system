@@ -6,8 +6,10 @@ import com.eimp.dto.UsersDTO;
 import com.eimp.entity.UserProfilesEntity;
 import com.eimp.entity.UsersEntity;
 import com.eimp.exception.ResourceNotFoundException;
+import com.eimp.exception.UserAlreadyExists;
 import com.eimp.repository.UserProfileRepository;
 import com.eimp.repository.UserRepository;
+import com.eimp.service.EmailService;
 import com.eimp.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,7 +17,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserImpl implements UserService {
@@ -23,20 +27,35 @@ public class UserImpl implements UserService {
     private final ModelMapper modelMapper;
     private final UserProfileRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserImpl(UserRepository userRepository, ModelMapper modelMapper, UserProfileRepository userProfileRepository, PasswordEncoder passwordEncoder) {
+    public UserImpl(UserRepository userRepository, ModelMapper modelMapper, UserProfileRepository userProfileRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.userProfileRepository = userProfileRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     @Override
     public UsersDTO createUser(UsersDTO userDTO) {
+        if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+            throw new UserAlreadyExists("User with email " + userDTO.getEmail() + "Already exists");
+        }
         UsersEntity entity = modelMapper.map(userDTO, UsersEntity.class);
         entity.setPasswordChangeRequired(true);
         entity.setPassword(passwordEncoder.encode("User@123"));
         UsersEntity saved = userRepository.save(entity);
+
+        Map<String, Object> variables = new HashMap<>();
+
+        variables.put("name", userDTO.getFirstName());
+        variables.put("email", userDTO.getEmail());
+        variables.put("password", "User@123");
+        variables.put("role", userDTO.getRole());
+
+        emailService.sendEmail(userDTO.getEmail(), "WELCOME to EIMP", "welcome-email", variables);
+
         return modelMapper.map(saved, UsersDTO.class);
     }
 
@@ -52,10 +71,7 @@ public class UserImpl implements UserService {
             UserProfilesDTO profilesDTO = null;
 
             if (userEntity.getUserProfile() != null) {
-                profilesDTO = modelMapper.map(
-                        userEntity.getUserProfile(),
-                        UserProfilesDTO.class
-                );
+                profilesDTO = modelMapper.map(userEntity.getUserProfile(), UserProfilesDTO.class);
 
                 profilesDTO.setUserId(userEntity.getId());
             }
@@ -94,8 +110,7 @@ public class UserImpl implements UserService {
 
     @Override
     public UserProfilesDTO updateUserProfile(Long userId, UserProfilesDTO userProfilesDTO, Authentication authentication) {
-        UsersEntity user = userRepository.findById(userId).orElseThrow(() ->
-                new ResourceNotFoundException("User not found with id : " + userId));
+        UsersEntity user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + userId));
 
         UserProfilesEntity profileEntity = userProfileRepository.findByUserId(userId).orElse(new UserProfilesEntity());
         profileEntity.setUser(user);

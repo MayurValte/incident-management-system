@@ -30,11 +30,17 @@ public class AlertsEntity {
     private AlertStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_to")
+    @JoinColumn(
+            name = "assigned_to",
+            foreignKey = @ForeignKey(name = "fk_alert_assigned_user")
+    )
     private UsersEntity assignedTo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "device_id")
+    @JoinColumn(
+            name = "device_id",
+            foreignKey = @ForeignKey(name = "fk_alert_device")
+    )
     private DevicesEntity device;
 
     @ManyToMany

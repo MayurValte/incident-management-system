@@ -3,6 +3,7 @@ package com.eimp.advices;
 import com.eimp.exception.AlertStatusException;
 import com.eimp.exception.BadRequestException;
 import com.eimp.exception.ResourceNotFoundException;
+import com.eimp.exception.UserAlreadyExists;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -54,6 +55,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AlertStatusException.class)
     public ResponseEntity<ApiResponse<?>> handleAlertAlreadyResolved(AlertStatusException exception){
+        String message = exception.getMessage();
+        ApiError apiError=ApiError.builder()
+                .status(HttpStatus.CONFLICT)
+                .message(message)
+                .build();
+        return buildErrorResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(UserAlreadyExists.class)
+    public ResponseEntity<ApiResponse<?>> handleUserAlreadyPresent(UserAlreadyExists exception){
         String message = exception.getMessage();
         ApiError apiError=ApiError.builder()
                 .status(HttpStatus.CONFLICT)

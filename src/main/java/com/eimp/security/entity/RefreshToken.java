@@ -22,7 +22,10 @@ public class RefreshToken {
     private LocalDateTime expiryDate;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(
+            name = "user_id",
+            foreignKey = @ForeignKey(name = "fk_refresh_token_user")
+    )
     private UsersEntity user;
 
 }
