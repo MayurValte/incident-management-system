@@ -26,7 +26,7 @@ public class EmailServiceImpl implements EmailService {
         this.templateEngine = templateEngine;
     }
 
-    @Async
+    @Async("taskExecutor")
     @Override
     public void sendEmail(String to, String subject, String templateName, Map<String, Object> variables) {
         try {
